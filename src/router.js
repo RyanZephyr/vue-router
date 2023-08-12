@@ -17,6 +17,7 @@ import { AbstractHistory } from './history/abstract'
 
 import type { Matcher } from './create-matcher'
 
+// router组件选项，对应一个VueRouter实例。
 export default class VueRouter {
   static install: () => void
   static version: string
@@ -41,25 +42,34 @@ export default class VueRouter {
     if (process.env.NODE_ENV !== 'production') {
       warn(this instanceof VueRouter, `Router must be called with the new operator.`)
     }
+
     this.app = null
     this.apps = []
     this.options = options
     this.beforeHooks = []
     this.resolveHooks = []
     this.afterHooks = []
-    this.matcher = createMatcher(options.routes || [], this)
+    this.matcher = createMatcher(options.routes || [], this) // 创建matcher实例
 
-    let mode = options.mode || 'hash'
+    // 1. 确定使用的路由模式
+    let mode = options.mode || 'hash' // 默认使用hash路由模式
+
+    // 如果路由选项设置了history路由模式，
+    // 同时，环境不支持history.pushState，且路由选项fallback允许回退到hash路由模式，
+    // 则回退到hash路由模式。
     this.fallback =
       mode === 'history' && !supportsPushState && options.fallback !== false
     if (this.fallback) {
       mode = 'hash'
     }
+
+    // 非浏览器环境下，使用abstract路由模式
     if (!inBrowser) {
       mode = 'abstract'
     }
     this.mode = mode
 
+    // 2. 应用最终选定的路由模式，创建相应的History实例。
     switch (mode) {
       case 'history':
         this.history = new HTML5History(this, options.base)
@@ -116,6 +126,7 @@ export default class VueRouter {
 
     this.app = app
 
+    // 调用this.history的两个方法：transitionTo() & listen().
     const history = this.history
 
     if (history instanceof HTML5History || history instanceof HashHistory) {

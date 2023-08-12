@@ -36,6 +36,7 @@ export class History {
   cleanupListeners: Function
 
   // implemented by sub-classes
+  // +: syntax from flow, meaning read-only properties.
   +go: (n: number) => void
   +push: (loc: RawLocation, onComplete?: Function, onAbort?: Function) => void
   +replace: (
